@@ -1,0 +1,19 @@
+# Environment
+.env
+
+# Database lokal (lama)
+db.json
+db-cp.json
+id.json
+cleanDB.js
+migrate.js
+db
+
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+.pnpm-debug.log
+
+# Backup
+backup/

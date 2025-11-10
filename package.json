@@ -1,0 +1,29 @@
+{
+  "name": "d-bot",
+  "version": "1.0.0",
+  "description": "dins bot learn",
+  "main": "main.js",
+  "scripts": {
+    "dev": "nodemon main.js --ignore db.json",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "bot",
+    "d",
+    "bot"
+  ],
+  "author": "dinar ss",
+  "license": "ISC",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.76.1",
+    "bitcoinjs-lib": "^6.1.7",
+    "dotenv": "^17.2.2",
+    "ecpair": "^3.0.0",
+    "node-fetch": "^2.7.0",
+    "node-json-db": "^2.3.1",
+    "node-telegram-bot-api": "^0.66.0",
+    "nodemon": "^3.1.10",
+    "rate-limiter-flexible": "^8.0.1",
+    "tiny-secp256k1": "^2.2.4"
+  }
+}
