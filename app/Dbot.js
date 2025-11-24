@@ -449,21 +449,7 @@ ${game.description}
         }
   
         const pesan = `
-  📢 *PEMBERITAHUAN PEMBARUAN BOT*
-  
-  Halo semuanya! 👋  
-  Bot ini baru aja dapet beberapa pembaruan buat ningkatin performa dan pengalaman pengguna.
-  
-  🧩 *Perubahan terbaru:*  
-  - 🔧 Perbaikan beberapa bug kecil  
-  - ⚡ Respons lebih cepat  
-  - 🎨 Tampilan pesan lebih rapi  
-  - 🆕 Penambahan beberapa fitur baru  
-  
-  Terima kasih udah terus pake bot ini 💫  
-  Jangan ragu buat kasih saran ya biar makin keren lagi!
-  
-  – *DNR Dev*
+        Hallo kok ga di pake pake
         `.trim();
         
         const { getBroadcast } = require("../libs/db.js");
@@ -608,6 +594,7 @@ ${game.description}
     const testEndpoint = "https://randomfox-ca.translate.goog/floof/?_x_tr_sl=en&_x_tr_tl=id&_x_tr_hl=id&_x_tr_pto=tc"
     this.onText(commands.test, async(data) => {
       try{
+        console.log("Fitur test di pake " + data.from.first_name)
         const apiCall = await fetch(testEndpoint)
         const response = await apiCall.json()
         const { image, link } = response
@@ -619,19 +606,82 @@ ${game.description}
       }
     })
   }
-  getUser() {
-    this.onText(commands.ser, async(data) => {
+  getHack() {
+    const hackEdnpoint = "https://hacker-news.firebaseio.com/v0/item/8863.json"
+    this.onText(commands.hack, async(data) => {
       try {
-        const apiCall = await data.json()
-        const { text, timestem, id} = await apiCall
-        console.log(apiCall)
-        this.sendMessage(data.from.id, `${apiCall}`)
+        console.log("Fitur Hack di pake " + data.from.first_name)
+        const apiCall = await fetch(hackEdnpoint)
+        const response = await apiCall.json()
+        const { by, descendants, title, url, kids } = response
+        const kidsList = kids.join(', ') 
+        this.sendMessage(data.from.id, `Created By: ${by}, 
+Descendants: ${descendants}, 
+${title},
+Url: ${url},
+Kids: ${kidsList}`)
       }catch(err) {
         console.log(err)
-        this.sendMessage(data.from.id, err)
+        this.sendMessage(data.from.id, "err bray")
       }
     })
   }
+  getNaruto() {
+  const narutoEndpoint = "https://api.jikan.moe/v4/anime?q=naruto"
+    this.onText(commands.naruto, async (data) => {
+      try {
+        const apiCall = await fetch(narutoEndpoint)
+        const response = await apiCall.json()
+  
+        // ambil anime pertama
+        const anime = response.data[0]
+  
+        const caption = 
+  `*${anime.title}*
+  Score: ${anime.score}
+  Episodes: ${anime.episodes}
+  Status: ${anime.status}
+  `
+  
+        // kirim foto + caption
+        this.sendPhoto(
+          data.from.id,
+          anime.images.jpg.image_url,
+          { caption, parse_mode: "Markdown" }
+        )
+  
+      } catch (err) {
+        console.log(err)
+        this.sendMessage(data.from.id, `⚠️ Terjadi kesalahan brayy`)
+      }
+    })
+}
+  
+  getWallet() {
+    this.onText(commands.wallet, async (data, match) => {
+      const address = match[1];
+      const url = `https://blockstream.info/api/address/${address}`;
+  
+      try {
+        const apiCall = await fetch(url);
+        const response = await apiCall.json();
+  
+        let jsonText = JSON.stringify(response, null, 2);
+  
+        const chunkSize = 4000;
+        for (let i = 0; i < jsonText.length; i += chunkSize) {
+          const chunk = jsonText.substring(i, i + chunkSize);
+          await this.sendMessage(data.from.id, `\`${chunk}\``, {
+            parse_mode: "Markdown"
+          });
+        }
+  
+      } catch (err) {
+        console.error(err);
+        this.sendMessage(data.from.id, "⚠️ Error brayy, alamat invalid atau API down!");
+      }
+  })
+}
   initFeatures() {
     this.getMeme()
     this.getUserList()

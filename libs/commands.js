@@ -18,7 +18,9 @@ const commands = {
   userlist: /^\/userlist$/,
   gabut: /^\/gabut$/,
   test: /^\/test$/,
-  ser: /^\/ser$/
+  hack: /^\/hack$/,
+  naruto: /^\/naruto$/,
+  wallet: /^\/wallet (.+)/
 }
 
 module.exports = commands

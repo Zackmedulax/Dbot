@@ -30,7 +30,9 @@ const main = () => {
   dbot.getUserList()
   dbot.getGabut()
   dbot.getTest()
-  dbot.getUser()
+  dbot.getHack()
+  dbot.getNaruto()
+  dbot.getWallet()
   // dbot.getQRCode()
   // dbot.getBTCWallet()
 }
