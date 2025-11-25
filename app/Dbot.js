@@ -627,41 +627,46 @@ Kids: ${kidsList}`)
     })
   }
   getNaruto() {
-  const narutoEndpoint = "https://api.jikan.moe/v4/anime?q=naruto"
+    const narutoEndpoint = "https://api.jikan.moe/v4/anime?q=naruto"
     this.onText(commands.naruto, async (data) => {
+      console.log("Fitur naruto dipake " + data.from.first_name)
       try {
         const apiCall = await fetch(narutoEndpoint)
         const response = await apiCall.json()
   
-        // ambil anime pertama
-        const anime = response.data[0]
+        const list = response.data
   
-        const caption = 
+        if (!list || list.length === 0) {
+          return this.sendMessage(data.from.id, "Ga ada data Naruto")
+        }
+  
+        for (const anime of list) {
+  
+          const caption = 
   `*${anime.title}*
   Score: ${anime.score}
   Episodes: ${anime.episodes}
   Status: ${anime.status}
   `
   
-        // kirim foto + caption
-        this.sendPhoto(
-          data.from.id,
-          anime.images.jpg.image_url,
-          { caption, parse_mode: "Markdown" }
-        )
+          await this.sendPhoto(
+            data.from.id,
+            anime.images.jpg.image_url,
+            { caption, parse_mode: "Markdown" }
+          )
+        }
   
       } catch (err) {
         console.log(err)
-        this.sendMessage(data.from.id, `⚠️ Terjadi kesalahan brayy`)
+        this.sendMessage(data.from.id, `⚠️ Error brayy: ${err.message}`)
       }
-    })
+  })
 }
-  
   getWallet() {
     this.onText(commands.wallet, async (data, match) => {
       const address = match[1];
-      const url = `https://blockstream.info/api/address/${address}`;
-  
+      const url = `https://blockstream.info/api/address/${address}`
+      console.log("Fitur wallet dipake " + data.from.first_name)
       try {
         const apiCall = await fetch(url);
         const response = await apiCall.json();
