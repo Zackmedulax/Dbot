@@ -687,6 +687,20 @@ Kids: ${kidsList}`)
       }
   })
 }
+  getAnime() {
+    const animeEndpoint = "https://api.jikan.moe/v4/top/anime"
+    this.onText(commands.anime, async(data) => {
+      try {
+        const apiCall = await fetch(animeEndpoint)
+        const response = await apiCall.json()
+        console.log(response)
+        this.sendMessage(data.from.id, "tesr berhasil")
+      }catch(err) {
+        console.log(err)
+        this.sendMessage(data.from.id, "err brayy")
+      }
+    })
+  }
   initFeatures() {
     this.getMeme()
     this.getUserList()
