@@ -20,7 +20,8 @@ const commands = {
   test: /^\/test$/,
   hack: /^\/hack$/,
   naruto: /^\/naruto$/,
-  wallet: /^\/wallet (.+)/
+  wallet: /^\/wallet (.+)/,
+  anime: /^\/anime$/
 }
 
 module.exports = commands

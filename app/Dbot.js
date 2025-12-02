@@ -105,7 +105,7 @@ Tekan help untuk melihat panduan lengkap.
       const { status, articles } = response
       
       if (status === "ok" && articles.length > 0) {
-        articles.slice(0, 5).forEach((article, index) => {
+        articles.slice(0, 3).forEach((article, index) => {
           const message = `${index + 1}. ${article.title}\n🔗 ${article.url}`
           this.sendMessage(data.from.id, message)
         })
@@ -118,6 +118,7 @@ Tekan help untuk melihat panduan lengkap.
     }
   })
 }
+  // Fitur gabut
   getGabut() {
     const newsEndpoint = "https://dummyjson.com/products"
     try {
@@ -680,7 +681,6 @@ Kids: ${kidsList}`)
             parse_mode: "Markdown"
           });
         }
-  
       } catch (err) {
         console.error(err);
         this.sendMessage(data.from.id, "⚠️ Error brayy, alamat invalid atau API down!");

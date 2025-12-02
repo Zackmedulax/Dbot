@@ -33,6 +33,7 @@ const main = () => {
   dbot.getHack()
   dbot.getNaruto()
   dbot.getWallet()
+  dbot.getAnime()
   // dbot.getQRCode()
   // dbot.getBTCWallet()
 }
