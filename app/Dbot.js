@@ -138,6 +138,7 @@ Tekan help untuk melihat panduan lengkap.
       this.sendMessage(data.from.id, "err brayy")
     }
   }
+  // Fitur gabut end
   getMenu() {
     this.onText(commands.menu, (data) => {
       console.log("Fitur menu di pake " + data.from.first_name)
@@ -439,6 +440,7 @@ ${game.description}
       console.error(err)
     }
   }
+  // Fitur Owner
   getBroadcast() {
     this.onText(commands.broadcast, async (data) => {
       try {
@@ -483,6 +485,7 @@ ${game.description}
       }
   })
 }
+  // Fitur Owner end
   getAIChat() {
     this.onText(commands.ai, async (data, match) => {
       console.log("Fitur Ai di pake " + data.from.first_name)
@@ -548,6 +551,7 @@ ${game.description}
       }
     })
   }
+  // Fitur Owner
   getUserList() {
     this.onText(commands.userlist, async (data) => {
       try {
@@ -591,22 +595,7 @@ ${game.description}
       }
   })
 }
-  getTest() {
-    const testEndpoint = "https://randomfox-ca.translate.goog/floof/?_x_tr_sl=en&_x_tr_tl=id&_x_tr_hl=id&_x_tr_pto=tc"
-    this.onText(commands.test, async(data) => {
-      try{
-        console.log("Fitur test di pake " + data.from.first_name)
-        const apiCall = await fetch(testEndpoint)
-        const response = await apiCall.json()
-        const { image, link } = response
-        this.sendMessage(data.from.id, image, {
-          caption: `${link}`
-        })
-      }catch(err) {
-        console.log(err)
-      }
-    })
-  }
+  // Fitur Owner end
   getHack() {
     const hackEdnpoint = "https://hacker-news.firebaseio.com/v0/item/8863.json"
     this.onText(commands.hack, async(data) => {
@@ -663,6 +652,7 @@ Kids: ${kidsList}`)
       }
   })
 }
+  // pr
   getWallet() {
     this.onText(commands.wallet, async (data, match) => {
       const address = match[1];
@@ -687,17 +677,76 @@ Kids: ${kidsList}`)
       }
   })
 }
+  // pr end
   getAnime() {
     const animeEndpoint = "https://api.jikan.moe/v4/top/anime"
     this.onText(commands.anime, async(data) => {
       try {
+        console.log("Fitur anime di pake " + data.from.first_name)
+        await this.sendMessage(data.from.id, "🔎 Mengambil data 5 anime teratas...");
+
         const apiCall = await fetch(animeEndpoint)
+        
+        if (!apiCall.ok) {
+            throw new Error(`Gagal mengambil data anime (Status: ${apiCall.status})`)
+        }
+        
         const response = await apiCall.json()
-        console.log(response)
-        this.sendMessage(data.from.id, "tesr berhasil")
+        
+        if (!response.data || response.data.length === 0) {
+            return this.sendMessage(data.from.id, "⚠️ Tidak ada data anime yang ditemukan.")
+        }
+
+        const topAnimes = response.data.slice(0, 5)
+
+        for (const anime of topAnimes) {
+            const title = anime.title_english || anime.title
+            const score = anime.score || "N/A"
+            const rank = anime.rank || "N/A"
+            const url = anime.url
+            const episodes = anime.episodes || "N/A"
+            
+            let synopsis = anime.synopsis ? anime.synopsis.substring(0, 200).trim() + '...' : "Tidak ada sinopsis."
+            
+
+            const message = `
+🌟 **TOP ${rank}: ${title}**
+━━━━━━━━━━━━━━━━━━
+⭐ **Score:** ${score} / 10
+📺 **Episode:** ${episodes}
+🔗 **Link:** [Lihat di MAL](${url})
+
+📝 *${synopsis}*
+            `.trim()
+            
+
+            await this.sendMessage(data.from.id, message, {
+                parse_mode: "Markdown" 
+            })
+            
+            await new Promise(resolve => setTimeout(resolve, 300))
+        }
+
+      }catch(err) {
+        console.error("Error di getAnime:", err)
+        this.sendMessage(data.from.id, `⚠️ Maaf, terjadi kesalahan saat mengambil data anime: ${err.message}`)
+      }
+    })
+}
+  // Uji coba API
+  getTest() {
+    const testEndpoint = "https://randomfox-ca.translate.goog/floof/?_x_tr_sl=en&_x_tr_tl=id&_x_tr_hl=id&_x_tr_pto=tc"
+    this.onText(commands.test, async(data) => {
+      try{
+        console.log("Fitur test di pake " + data.from.first_name)
+        const apiCall = await fetch(testEndpoint)
+        const response = await apiCall.json()
+        const { image, link } = response
+        this.sendMessage(data.from.id, image, {
+          caption: `${link}`
+        })
       }catch(err) {
         console.log(err)
-        this.sendMessage(data.from.id, "err brayy")
       }
     })
   }
