@@ -70,7 +70,6 @@ Tekan help untuk melihat panduan lengkap.
   getSticker() {
     this.on("sticker", (data) => {
       console.log("Fitur sticker di pake " + data.from.first_name)
-      console.log(data)
       this.sendMessage(data.from.id, data.sticker.emoji)
     })
   }
