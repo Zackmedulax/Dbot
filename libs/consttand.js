@@ -31,7 +31,6 @@ Lainnya
 /help         → kamu lagi baca ini
 /menu         → list command singkat
 
-Ketik aja langsung perintahnya bro, ga usah takut salah
 `.trim();
 
 const startMessage = `Halo bro! 

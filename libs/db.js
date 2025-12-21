@@ -114,7 +114,7 @@ async function getAIChatHistory(userId) {
         role: chat.from === 'assistant' ? 'assistant' : 'user',
         content: chat.text.replace('/ai ', '')
       }))
-      .slice(-6); // Max 3 pasang
+      .slice(-6);
   } catch (err) {
     console.error('Error get AI history:', err);
     return [];

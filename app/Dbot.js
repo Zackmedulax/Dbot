@@ -117,27 +117,6 @@ Tekan help untuk melihat panduan lengkap.
     }
   })
 }
-  // Fitur gabut
-  getGabut() {
-    const newsEndpoint = "https://dummyjson.com/products"
-    try {
-      this.onText(commands.gabut, async(data) => {
-        const apiCall = await fetch(newsEndpoint)
-        const response = await apiCall.json()
-        
-        let message = "📦 Daftar Produk:\n\n"
-        response.products.slice(0, 30).forEach((product, index) => {
-          message += `${index + 1}. ${product.title} - $${product.price}\n`
-        })
-        
-        this.sendMessage(data.from.id, message)
-      })
-    }catch(err) {
-      console.log(err)
-      this.sendMessage(data.from.id, "err brayy")
-    }
-  }
-  // Fitur gabut end
   getMenu() {
     this.onText(commands.menu, (data) => {
       console.log("Fitur menu di pake " + data.from.first_name)
@@ -616,69 +595,85 @@ Kids: ${kidsList}`)
     })
   }
   getNaruto() {
-    const narutoEndpoint = "https://api.jikan.moe/v4/anime?q=naruto"
-    this.onText(commands.naruto, async (data) => {
-      console.log("Fitur naruto dipake " + data.from.first_name)
-      try {
-        const apiCall = await fetch(narutoEndpoint)
-        const response = await apiCall.json()
-  
-        const list = response.data
-  
-        if (!list || list.length === 0) {
-          return this.sendMessage(data.from.id, "Ga ada data Naruto")
-        }
-  
-        for (const anime of list) {
-  
-          const caption = 
-  `*${anime.title}*
-  Score: ${anime.score}
-  Episodes: ${anime.episodes}
-  Status: ${anime.status}
-  `
-  
-          await this.sendPhoto(
-            data.from.id,
-            anime.images.jpg.image_url,
-            { caption, parse_mode: "Markdown" }
-          )
-        }
-  
-      } catch (err) {
-        console.log(err)
-        this.sendMessage(data.from.id, `⚠️ Error brayy: ${err.message}`)
+  const narutoEndpoint = "https://api.jikan.moe/v4/anime?q=naruto&limit=5"
+  this.onText(commands.naruto, async (data) => {
+    console.log("Fitur naruto dipake " + data.from.first_name)
+    try {
+      const apiCall = await fetch(narutoEndpoint)
+      const response = await apiCall.json()
+
+      const list = response.data
+
+      if (!list || list.length === 0) {
+        return this.sendMessage(data.from.id, "Ga ada data Naruto")
       }
+      
+      const limitedList = list.slice(0, 3)
+
+      for (const anime of limitedList) {
+        const caption = `*${anime.title}*\nScore: ${anime.score}\nEpisodes: ${anime.episodes}\nStatus: ${anime.status}`
+
+        await this.sendPhoto(
+          data.from.id,
+          anime.images.jpg.image_url,
+          { caption, parse_mode: "Markdown" }
+        )
+      }
+
+    } catch (err) {
+      console.log(err)
+      this.sendMessage(data.from.id, `⚠️ Error brayy: ${err.message}`)
+    }
   })
 }
-  // pr
   getWallet() {
     this.onText(commands.wallet, async (data, match) => {
-      const address = match[1];
-      const url = `https://blockstream.info/api/address/${address}`
-      console.log("Fitur wallet dipake " + data.from.first_name)
+      const address = match[1].trim();
+      const url = `https://blockstream.info/api/address/${address}`;
+      console.log("Fitur wallet dipake " + data.from.first_name);
+
       try {
         const apiCall = await fetch(url);
-        const response = await apiCall.json();
-  
-        let jsonText = JSON.stringify(response, null, 2);
-  
-        const chunkSize = 4000;
-        for (let i = 0; i < jsonText.length; i += chunkSize) {
-          const chunk = jsonText.substring(i, i + chunkSize);
-          await this.sendMessage(data.from.id, `\`${chunk}\``, {
-            parse_mode: "Markdown"
-          });
+        
+        if (!apiCall.ok) {
+          return this.sendMessage(data.from.id, "⚠️ Alamat tidak ditemukan atau API bermasalah.");
         }
+
+        const res = await apiCall.json();
+
+        const totalReceived = res.chain_stats.funded_txo_sum;
+        const totalSent = res.chain_stats.spent_txo_sum;
+        const balanceSat = totalReceived - totalSent;
+        const balanceBTC = (balanceSat / 100000000).toFixed(8);
+
+        let message = `₿ITCOIN WALLET INFO\n\n`;
+        message += `*Address:* \`${res.address}\`\n`;
+        message += `--- --- --- --- --- --- --- ---\n`;
+        message += `*💰 Saldo Saat Ini:* \`${balanceBTC} BTC\`\n`;
+        message += `*📥 Total Diterima:* ${(totalReceived / 100000000).toFixed(8)} BTC\n`;
+        message += `*📤 Total Dikirim:* ${(totalSent / 100000000).toFixed(8)} BTC\n\n`;
+        
+        message += `*🔄 Transaksi Terkonfirmasi:* ${res.chain_stats.tx_count}\n`;
+        
+        if (res.mempool_stats.tx_count > 0) {
+          const pendingSat = res.mempool_stats.funded_txo_sum - res.mempool_stats.spent_txo_sum;
+          message += `*⏳ Pending (Mempool):* ${(pendingSat / 100000000).toFixed(8)} BTC (${res.mempool_stats.tx_count} tx)\n`;
+        } else {
+          message += `*⏳ Pending:* Tidak ada\n`;
+        }
+
+        await this.sendMessage(data.from.id, message, {
+          parse_mode: "Markdown"
+        });
+
       } catch (err) {
         console.error(err);
-        this.sendMessage(data.from.id, "⚠️ Error brayy, alamat invalid atau API down!");
+        this.sendMessage(data.from.id, "⚠️ Error brayy, gagal memproses data wallet!");
       }
-  })
+    });
 }
-  // pr end
   getAnime() {
-    const animeEndpoint = "https://api.jikan.moe/v4/top/anime"
+    const animeEndpoint = "https://api.jikan.moe/v4/top/anime?limit=5"
     this.onText(commands.anime, async(data) => {
       try {
         console.log("Fitur anime di pake " + data.from.first_name)
@@ -746,6 +741,26 @@ Kids: ${kidsList}`)
         })
       }catch(err) {
         console.log(err)
+      }
+    })
+  }
+  getJson() {
+    const jsonEndpoint = "https://jsonplaceholder.typicode.com/todos/1"
+    this.onText(commands.coba, async(data) => {
+      try {
+        const apiCall = await fetch(jsonEndpoint)
+        const response = await apiCall.json()
+        const { userid, id, title, completed } = response
+        this.sendMessage(data.from.id, `
+${userid},
+${id}, 
+${title},
+${completed}
+        `)
+      } catch(err) {
+        const Err = err.json()
+        console.log(err)
+        this.sendMessage(data.from.id, `Err Brayy ${Err}`)
       }
     })
   }
