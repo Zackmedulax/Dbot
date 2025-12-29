@@ -17,7 +17,6 @@ const commands = {
   meme: /^\/meme$/,
   userlist: /^\/userlist$/,
   test: /^\/test$/,
-  hack: /^\/hack$/,
   naruto: /^\/naruto$/,
   wallet: /^\/wallet\s+(.+)/, 
   anime: /^\/anime$/,

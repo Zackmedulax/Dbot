@@ -21,7 +21,6 @@ AI Keren
 /img pemandangan gunung → bikin gambar pake AI
 
 Fitur Baru
-/hack         → postingan legendaris hacker news
 /naruto       → quote + gambar naruto random
 /anime        → data anime teratas dari jikan
 /wallet       → cek saldo wallet crypto (coming soon)
@@ -60,7 +59,7 @@ QUICK MENU
 /berita /games /meme
 /cuaca /ai /img
 /quote /follow /random
-/naruto /anime /hack
+/naruto /anime
 `.trim();
 
 module.exports = { 

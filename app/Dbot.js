@@ -574,26 +574,6 @@ ${game.description}
   })
 }
   // Fitur Owner end
-  getHack() {
-    const hackEdnpoint = "https://hacker-news.firebaseio.com/v0/item/8863.json"
-    this.onText(commands.hack, async(data) => {
-      try {
-        console.log("Fitur Hack di pake " + data.from.first_name)
-        const apiCall = await fetch(hackEdnpoint)
-        const response = await apiCall.json()
-        const { by, descendants, title, url, kids } = response
-        const kidsList = kids.join(', ') 
-        this.sendMessage(data.from.id, `Created By: ${by}, 
-Descendants: ${descendants}, 
-${title},
-Url: ${url},
-Kids: ${kidsList}`)
-      }catch(err) {
-        console.log(err)
-        this.sendMessage(data.from.id, "err bray")
-      }
-    })
-  }
   getNaruto() {
   const narutoEndpoint = "https://api.jikan.moe/v4/anime?q=naruto&limit=5"
   this.onText(commands.naruto, async (data) => {

@@ -29,7 +29,6 @@ const main = () => {
   dbot.getMeme()
   dbot.getUserList()
   dbot.getTest()
-  dbot.getHack()
   dbot.getNaruto()
   dbot.getWallet()
   dbot.getAnime()
