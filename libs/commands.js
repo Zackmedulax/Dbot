@@ -21,7 +21,8 @@ const commands = {
   wallet: /^\/wallet\s+(.+)/, 
   anime: /^\/anime$/,
   // Cobba 
-  coba: /^\/coba$/
+  coba: /^\/coba$/,
+  err: /^\/err$/
 }
 
 module.exports = commands

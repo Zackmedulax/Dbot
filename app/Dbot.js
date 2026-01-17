@@ -744,6 +744,20 @@ ${completed}
       }
     })
   }
+  getErr() {
+    const ErrEndpoint = "https://api.binderbyte.com/v1/track"
+    try {
+      this.onText(commands.err, async(data) => {
+        const apiCall = await fetch(ErrEndpoint)
+        const response = await apiCall.json()
+        console.log(response)
+        this.sendMessage(data.from.id, "jalan")
+      })
+    }catch(err) {
+      console.log(err)
+      this.sendMessage(data.from.id, "Errr")
+    }
+  }
   initFeatures() {
     this.getMeme()
     this.getUserList()

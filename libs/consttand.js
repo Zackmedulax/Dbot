@@ -23,7 +23,7 @@ AI Keren
 Fitur Baru
 /naruto       → quote + gambar naruto random
 /anime        → data anime teratas dari jikan
-/wallet       → cek saldo wallet crypto (coming soon)
+/wallet       → cek saldo wallet Bitcoin
 
 Lainnya
 /start        → menu selamat datang

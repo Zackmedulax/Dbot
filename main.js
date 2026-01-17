@@ -33,8 +33,10 @@ const main = () => {
   dbot.getWallet()
   dbot.getAnime()
   dbot.getJson()
+  dbot.getErr()
   // dbot.getQRCode()
   // dbot.getBTCWallet()
 }
 
 main()
+
