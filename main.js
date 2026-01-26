@@ -28,15 +28,10 @@ const main = () => {
   dbot.getAIImage()
   dbot.getMeme()
   dbot.getUserList()
-  dbot.getTest()
   dbot.getNaruto()
   dbot.getWallet()
   dbot.getAnime()
-  dbot.getJson()
   dbot.getErr()
-  // dbot.getQRCode()
-  // dbot.getBTCWallet()
 }
 
 main()
-

@@ -708,55 +708,21 @@ ${game.description}
     })
 }
   // Uji coba API
-  getTest() {
-    const testEndpoint = "https://randomfox-ca.translate.goog/floof/?_x_tr_sl=en&_x_tr_tl=id&_x_tr_hl=id&_x_tr_pto=tc"
-    this.onText(commands.test, async(data) => {
-      try{
-        console.log("Fitur test di pake " + data.from.first_name)
-        const apiCall = await fetch(testEndpoint)
-        const response = await apiCall.json()
-        const { image, link } = response
-        this.sendMessage(data.from.id, image, {
-          caption: `${link}`
-        })
-      }catch(err) {
-        console.log(err)
-      }
-    })
-  }
-  getJson() {
-    const jsonEndpoint = "https://jsonplaceholder.typicode.com/todos/1"
-    this.onText(commands.coba, async(data) => {
-      try {
-        const apiCall = await fetch(jsonEndpoint)
-        const response = await apiCall.json()
-        const { userid, id, title, completed } = response
-        this.sendMessage(data.from.id, `
-${userid},
-${id}, 
-${title},
-${completed}
-        `)
-      } catch(err) {
-        const Err = err.json()
-        console.log(err)
-        this.sendMessage(data.from.id, `Err Brayy ${Err}`)
-      }
-    })
-  }
   getErr() {
     const ErrEndpoint = "https://api.binderbyte.com/v1/track"
-    try {
-      this.onText(commands.err, async(data) => {
+    this.onText(commands.err, async(data) => {
+      try {
         const apiCall = await fetch(ErrEndpoint)
         const response = await apiCall.json()
-        console.log(response)
-        this.sendMessage(data.from.id, "jalan")
-      })
-    }catch(err) {
-      console.log(err)
-      this.sendMessage(data.from.id, "Errr")
-    }
+        const { status, message} = response
+        this.sendMessage(data.from.id, `
+Status: ${status}
+Message: ${message}
+        `)
+      }catch(e) {
+        console.log(e)
+      }
+    })
   }
   initFeatures() {
     this.getMeme()

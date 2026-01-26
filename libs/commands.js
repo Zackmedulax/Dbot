@@ -16,12 +16,10 @@ const commands = {
   img: /^\/img\s+(.+)$/i,
   meme: /^\/meme$/,
   userlist: /^\/userlist$/,
-  test: /^\/test$/,
   naruto: /^\/naruto$/,
   wallet: /^\/wallet\s+(.+)/, 
   anime: /^\/anime$/,
   // Cobba 
-  coba: /^\/coba$/,
   err: /^\/err$/
 }
 
