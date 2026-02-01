@@ -31,7 +31,7 @@ const main = () => {
   dbot.getNaruto()
   dbot.getWallet()
   dbot.getAnime()
-  dbot.getErr()
+  dbot.getIp()
 }
 
 main()

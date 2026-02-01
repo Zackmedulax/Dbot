@@ -98,6 +98,7 @@ Tekan help untuk melihat panduan lengkap.
   
   this.onText(commands.berita, async (data) => {
     console.log("Fitur berita di pake " + data.from.first_name)
+    console.log(data)
     try {
       const apiCall = await fetch(newsEndpoint)
       const response = await apiCall.json()
@@ -708,22 +709,40 @@ ${game.description}
     })
 }
   // Uji coba API
-  getErr() {
-    const ErrEndpoint = "https://api.binderbyte.com/v1/track"
-    this.onText(commands.err, async(data) => {
-      try {
-        const apiCall = await fetch(ErrEndpoint)
-        const response = await apiCall.json()
-        const { status, message} = response
-        this.sendMessage(data.from.id, `
-Status: ${status}
-Message: ${message}
-        `)
-      }catch(e) {
-        console.log(e)
+  getIp() {
+  this.onText(commands.ip, async (msg, data) => {
+    const chatId = msg.chat.id;
+
+    // Kita beritahu user bahwa kita tidak bisa ambil IP otomatis
+    const pesan = `
+*Cek Alamat IP Kamu*
+
+Untuk alasan keamanan, Telegram tidak membagikan alamat IP kamu ke Bot. 
+Silakan klik tombol di bawah untuk melihat detail koneksi kamu:
+    `;
+
+    const options = {
+      parse_mode: 'Markdown',
+      reply_markup: {
+        inline_keyboard: [
+          [
+            {
+              text: "🌐 Cek IP Saya",
+              // Link ini akan langsung menampilkan data JSON IP si user di browser mereka
+              url: "https://ipapi.co/json/" 
+            }
+          ]
+        ]
       }
-    })
-  }
+    };
+
+    try {
+      await this.sendMessage(chatId, pesan, options);
+    } catch (e) {
+      console.error("Error mengirim pesan:", e);
+    }
+  });
+}
   initFeatures() {
     this.getMeme()
     this.getUserList()
