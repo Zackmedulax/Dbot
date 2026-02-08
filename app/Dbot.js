@@ -98,7 +98,6 @@ Tekan help untuk melihat panduan lengkap.
   
   this.onText(commands.berita, async (data) => {
     console.log("Fitur berita di pake " + data.from.first_name)
-    console.log(data)
     try {
       const apiCall = await fetch(newsEndpoint)
       const response = await apiCall.json()
@@ -202,6 +201,7 @@ ${DateTime}
     this.sendMessage(data.from.id, "mohon maaf opsi ini sedang error")
   }
 }
+// F Crypto API Err
   getCrypto() {
   const cryptoUrl =
     "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false";
@@ -263,6 +263,7 @@ Update: ${last}
     console.error("getCrypto error:", err);
   }
 }
+// F Crypto API Err end
   getFinancial() {
     const symbols = [
     "NVDA", "MSFT", "AAPL", "GOOG", "GOOGL", "AMZN", "META", "TSLA",
