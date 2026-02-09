@@ -5,6 +5,7 @@
   "main": "main.js",
   "scripts": {
     "dev": "nodemon main.js --ignore db.json",
+    "test:unit": "vitest --ui",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -25,5 +26,8 @@
     "nodemon": "^3.1.10",
     "rate-limiter-flexible": "^8.0.1",
     "tiny-secp256k1": "^2.2.4"
+  },
+  "devDependencies": {
+    "@vitest/ui": "^4.0.18"
   }
 }
