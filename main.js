@@ -32,6 +32,7 @@ const main = () => {
   dbot.getWallet()
   dbot.getAnime()
   dbot.getIp()
+  dbot.getQc()
 }
 
 main()

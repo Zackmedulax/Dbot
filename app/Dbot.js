@@ -713,6 +713,7 @@ ${game.description}
   getIp() {
   this.onText(commands.ip, async (msg, data) => {
     const chatId = msg.chat.id;
+    console.log("Fitur ip dipake " + data.from.first_name);
 
     // Kita beritahu user bahwa kita tidak bisa ambil IP otomatis
     const pesan = `
@@ -742,6 +743,44 @@ Silakan klik tombol di bawah untuk melihat detail koneksi kamu:
     } catch (e) {
       console.error("Error mengirim pesan:", e);
     }
+  });
+}
+  getQc() {
+  this.onText(commands.qr, async (data, match) => {
+    try {
+      const userId = data.from.id;
+      const textToEncode = match[1];
+      console.log("Fitur qrcode dipake " + data.from.first_name);
+      
+      if (!textToEncode || textToEncode.trim() === '') {
+        this.sendMessage(userId, "Silakan ketik teks setelah /qr\nContoh: /qr https://example.com");
+        return;
+      }
+
+      const encodedText = encodeURIComponent(textToEncode);
+      const qrcodeEndpoint = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodedText}&format=png`;
+      
+      this.sendMessage(userId, "🔄 Membuat QR Code...");
+      
+      this.sendPhoto(userId, qrcodeEndpoint, {
+        caption: `QR Code untuk: ${textToEncode}`
+      });
+      
+    } catch (err) {
+      console.log("Error membuat QR:", err);
+      this.sendMessage(data.from.id, "❌ Gagal membuat QR Code. Silakan coba lagi.");
+    }
+  });
+
+  // Handler untuk format yang salah
+  this.onText(/^\/qr$/, (data) => {
+    this.sendMessage(data.from.id, 
+      "Format: /qr [teks atau url]\n" +
+      "Contoh:\n" +
+      "/qr https://google.com\n" +
+      "/qr Hello World\n" +
+      "/qr WA:08123456789"
+    );
   });
 }
   initFeatures() {
