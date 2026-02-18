@@ -33,6 +33,7 @@ const main = () => {
   dbot.getAnime()
   dbot.getIp()
   dbot.getQc()
+  dbot.getDownload()
 }
 
 main()

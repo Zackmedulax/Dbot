@@ -19,6 +19,7 @@ const commands = {
   naruto: /^\/naruto$/,
   wallet: /^\/wallet\s+(.+)/, 
   anime: /^\/anime$/,
+  download: /\/dl (.+)/,
   // Cobba 
   ip: /^\/ip$/,
   qr: /^\/qrcode\s+(.+)$/

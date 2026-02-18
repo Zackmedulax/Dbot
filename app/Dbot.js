@@ -709,6 +709,73 @@ ${game.description}
       }
     })
 }
+  getDownload() {
+    this.onText(commands.download, async (data, match) => {
+      const url = match[1].trim();
+      const chatId = data.from.id;
+      
+      console.log(`Fitur download dipake ` + data.from.first_name + ` - URL: ${url}`);
+      
+      const statusMsg = await this.sendMessage(chatId, " *Downloading...* Mohon tunggu", {
+        parse_mode: "Markdown"
+      });
+      
+      try {
+        const ytdlp = require('yt-dlp-exec');
+        const fs = require('fs');
+        const path = require('path');
+        
+
+        const downloadDir = './temp_downloads';
+        if (!fs.existsSync(downloadDir)) {
+          fs.mkdirSync(downloadDir);
+        }
+        
+
+        const fileName = `video_${Date.now()}.mp4`;
+        const filePath = path.join(downloadDir, fileName);
+        
+        await ytdlp(url, {
+          output: filePath,
+          format: 'mp4',
+          noCheckCertificates: true
+        });
+        
+
+        const stats = fs.statSync(filePath);
+        const fileSizeMB = stats.size / (1024 * 1024);
+        
+        if (fileSizeMB > 50) {
+          fs.unlinkSync(filePath);
+          return this.editMessageText(` Video terlalu besar (${fileSizeMB.toFixed(2)}MB)\nMax 50MB`, {
+            chat_id: chatId,
+            message_id: statusMsg.message_id,
+            parse_mode: "Markdown"
+          });
+        }
+        
+
+        await this.deleteMessage(chatId, statusMsg.message_id);
+        
+
+        await this.sendVideo(chatId, filePath, {
+          caption: `*Download selesai!*`,
+          parse_mode: "Markdown"
+        });
+        
+
+        fs.unlinkSync(filePath);
+        
+      } catch (err) {
+        console.error("Error download:", err);
+        await this.editMessageText(`agal download: ${err.message}`, {
+          chat_id: chatId,
+          message_id: statusMsg.message_id,
+          parse_mode: "Markdown"
+        });
+      }
+    });
+}
   // Uji coba API
   getIp() {
   this.onText(commands.ip, async (msg, data) => {
