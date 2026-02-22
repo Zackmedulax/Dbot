@@ -4,7 +4,7 @@
   "description": "dins bot learn",
   "main": "main.js",
   "scripts": {
-    "dev": "nodemon main.js --ignore db.json",
+    "start": "nodemon main.js --ignore db.json",
     "test:unit": "vitest --ui",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

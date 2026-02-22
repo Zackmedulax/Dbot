@@ -1,5 +1,6 @@
 # Environment
 .env
+temp_downloads
 
 # Database lokal (lama)
 db.json
