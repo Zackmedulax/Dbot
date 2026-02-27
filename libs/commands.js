@@ -20,9 +20,9 @@ const commands = {
   wallet: /^\/wallet\s+(.+)/, 
   anime: /^\/anime$/,
   download: /\/dl (.+)/,
+  qr: /^\/qrcode\s+(.+)$/,
   // Cobba 
   ip: /^\/ip$/,
-  qr: /^\/qrcode\s+(.+)$/
 }
 
 module.exports = commands
