@@ -657,23 +657,39 @@ ${game.description}
   getAnime() {
     const animeEndpoint = "https://api.jikan.moe/v4/top/anime?limit=5"
     this.onText(commands.anime, async(data) => {
+      const statusMsg = null
       try {
-        console.log("Fitur anime di pake " + data.from.first_name)
-        await this.sendMessage(data.from.id, "🔎 Mengambil data 5 anime teratas...");
-
-        const apiCall = await fetch(animeEndpoint)
+        console.log("Fitur anime di pake " + data.from.first_name);
+        
+        try {
+          statusMsg = await this.sendMessage(data.from.id, "🔎 Mengambil data 5 anime teratas...", {
+            parse_mode: "Markdown"
+          });
+        } catch(sendErr) {
+          console.log("Error", sendErr);
+        }
+        
+        const apiCall = await fetch(animeEndpoint);
         
         if (!apiCall.ok) {
-            throw new Error(`Gagal mengambil data anime (Status: ${apiCall.status})`)
+            throw new Error(`Gagal mengambil data anime (Status: ${apiCall.status})`);
         }
         
-        const response = await apiCall.json()
+        const response = await apiCall.json();
         
         if (!response.data || response.data.length === 0) {
+            if(statusMsg) {
+              await this
+              .deleteMessage(data.from.id, statusMsg.message_id).catch(() => {});
+            }
             return this.sendMessage(data.from.id, "⚠️ Tidak ada data anime yang ditemukan.")
         }
+        
+        if(statusMsg) {
+          await this.deleteMessage(data.from.id, statusMsg.message_id).catch(() => {});
+        }
 
-        const topAnimes = response.data.slice(0, 5)
+        const topAnimes = response.data.slice(0, 5);
 
         for (const anime of topAnimes) {
             const title = anime.title_english || anime.title
@@ -684,7 +700,7 @@ ${game.description}
             
             let synopsis = anime.synopsis ? anime.synopsis.substring(0, 200).trim() + '...' : "Tidak ada sinopsis."
             
-
+            
             const message = `
 🌟 **TOP ${rank}: ${title}**
 ━━━━━━━━━━━━━━━━━━
@@ -839,7 +855,6 @@ Silakan klik tombol di bawah untuk melihat detail koneksi kamu:
     }
   });
 
-  // Handler untuk format yang salah
   this.onText(/^\/qr$/, (data) => {
     this.sendMessage(data.from.id, 
       "Format: /qr [teks atau url]\n" +
