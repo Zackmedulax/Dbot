@@ -1,10 +1,9 @@
-name: Run D-Bot 24/7
+name: Run D-Bot
 
 on:
   schedule:
-    # Jalankan setiap 30 menit (bisa diubah)
     - cron: '*/30 * * * *'
-  workflow_dispatch:  # Bisa manual run dari GitHub
+  workflow_dispatch:
   push:
     branches: [ main ]
 
@@ -19,7 +18,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '18'
+        node-version: 'lts/*'
         cache: 'npm'
         
     - name: Install dependencies
@@ -38,7 +37,7 @@ jobs:
         SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
       run: node main.js
       
-    - name: Keep alive (biar ga mati)
+    - name: Keep alive
       run: |
         while true; do
           sleep 60

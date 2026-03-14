@@ -657,7 +657,7 @@ ${game.description}
   getAnime() {
     const animeEndpoint = "https://api.jikan.moe/v4/top/anime?limit=5"
     this.onText(commands.anime, async (data) => {
-      const statusMsg = null
+      let statusMsg = null
       try {
         console.log("Fitur anime di pake " + data.from.first_name);
 
