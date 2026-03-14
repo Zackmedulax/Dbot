@@ -798,7 +798,6 @@ ${game.description}
       const chatId = msg.chat.id;
       console.log("Fitur ip dipake " + data.from.first_name);
 
-      // Kita beritahu user bahwa kita tidak bisa ambil IP otomatis
       const pesan = `
 *Cek Alamat IP Kamu*
 
@@ -813,7 +812,6 @@ Silakan klik tombol di bawah untuk melihat detail koneksi kamu:
             [
               {
                 text: "🌐 Cek IP Saya",
-                // Link ini akan langsung menampilkan data JSON IP si user di browser mereka
                 url: "https://ipapi.co/json/"
               }
             ]
@@ -869,9 +867,10 @@ Silakan klik tombol di bawah untuk melihat detail koneksi kamu:
     const dogsEndpoint = "https://dog.ceo/api/breeds/image/random"
     this.onText(commands.dogs, async(data) => {
       try {
-        const apiCall = dogsEndpoint
-        const response = apiCall.json()
-        this.sendMessage(data.from.id, response)
+        const apiCall = await fetch(dogsEndpoint)
+        const response = await apiCall.json()
+        console.log(response)
+        this.sendMessage(data.from.id, "runn")
       } catch(err) {
         this.sendMessage(data.from.id, "Error bray")
       }
