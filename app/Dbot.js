@@ -865,6 +865,18 @@ Silakan klik tombol di bawah untuk melihat detail koneksi kamu:
       );
     });
   }
+  getDogs() {
+    const dogsEndpoint = "https://dog.ceo/api/breeds/image/random"
+    this.onText(commands.dogs, async(data) => {
+      try {
+        const apiCall = dogsEndpoint
+        const response = apiCall.json()
+        this.sendMessage(data.from.id, response)
+      } catch(err) {
+        this.sendMessage(data.from.id, "Error bray")
+      }
+    })
+  }
   initFeatures() {
     this.getMeme()
     this.getUserList()

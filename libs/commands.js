@@ -23,6 +23,7 @@ const commands = {
   qr: /^\/qrcode\s+(.+)$/,
   // Cobba 
   ip: /^\/ip$/,
+  dogs: /^\/dog$/,
 }
 
 module.exports = commands

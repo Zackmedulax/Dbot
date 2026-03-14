@@ -34,6 +34,7 @@ const main = () => {
   dbot.getIp()
   dbot.getQc()
   dbot.getDownload()
+  dbot.getDogs()
 }
 
 main()
