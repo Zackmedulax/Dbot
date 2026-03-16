@@ -486,6 +486,7 @@ ${game.description}
       }
     })
   }
+  // F Ai API Err
   getAIImage() {
     this.onText(commands.img, async (data, match) => {
       console.log("Fitur img di pake " + data.from.first_name)
@@ -505,6 +506,7 @@ ${game.description}
       }
     })
   }
+  // F Ai API Err End
   getMeme() {
     this.onText(commands.meme, async (data) => {
       console.log("Fitur meme di pake " + data.from.first_name)

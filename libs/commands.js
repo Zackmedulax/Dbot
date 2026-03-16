@@ -24,6 +24,7 @@ const commands = {
   // Cobba 
   ip: /^\/ip$/,
   dogs: /^\/dog$/,
+  dogs: /^\/dog$/,
 }
 
 module.exports = commands
