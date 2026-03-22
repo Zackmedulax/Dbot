@@ -35,6 +35,7 @@ const main = () => {
   dbot.getQc()
   dbot.getDownload()
   dbot.getDogs()
+  dbot.getYoutube()
 }
 
 main()

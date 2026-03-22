@@ -25,6 +25,18 @@ jobs:
         node-version: 'lts/*'
         cache: 'npm'
         
+    - name: Install yt-dlp & rclone
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y python3-pip ffmpeg
+        pip3 install yt-dlp
+        curl https://rclone.org/install.sh | sudo bash
+        
+    - name: Setup rclone config
+      run: |
+        mkdir -p ~/.config/rclone
+        echo "${{ secrets.GDRIVE_TOKEN }}" > ~/.config/rclone/rclone.conf
+        
     - name: Install dependencies
       run: npm ci
       

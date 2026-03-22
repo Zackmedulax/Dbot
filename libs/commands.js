@@ -24,7 +24,8 @@ const commands = {
   // Cobba 
   ip: /^\/ip$/,
   dogs: /^\/dog$/,
-  dogs: /^\/dog$/,
+  yt: /^\/yt\s+(https?:\/\/(www\.)?(youtube\.com|youtu\.be)\/.*)$/i,
+    ytlist: /^\/ytlist\s+(https?:\/\/(www\.)?(youtube\.com)\/playlist\?list=.*)$/i,
 }
 
 module.exports = commands

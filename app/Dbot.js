@@ -728,13 +728,13 @@ ${game.description}
     })
   }
   getDownload() {
-    this.onText(commands.download, async (data, match) => {
+    this.onText(commands.download, async (data, match, after) => {
       const url = match[1].trim();
       const chatId = data.from.id;
 
       console.log(`Fitur download dipake ` + data.from.first_name + ` - URL: ${url}`);
 
-      const statusMsg = await this.sendMessage(chatId, " *Downloading...* Mohon tunggu", {
+      const statusMsg = await this.sendMessage(chatId, ` *Downloading...* ${after[1]} Mohon tunggu`, {
         parse_mode: "Markdown"
       });
 
@@ -878,6 +878,170 @@ Silakan klik tombol di bawah untuk melihat detail koneksi kamu:
       }
     })
   }
+  getYoutube() {
+    const { exec } = require('child_process');
+    this.onText(commands.yt, async (data, match) => {
+        const url = match[1];
+        const chatId = data.from.id;
+        
+        console.log(`Fitur YouTube dipake oleh ${data.from.first_name}`);
+        
+        // Kirim notifikasi
+        const statusMsg = await this.sendMessage(chatId, "🎬 *Memproses video YouTube...*\n⏳ Mohon tunggu sebentar (2-5 menit)", {
+            parse_mode: "Markdown"
+        });
+        
+        try {
+            // Ambil judul video dulu
+            let title = "";
+            await new Promise((resolve) => {
+                exec(`yt-dlp --get-title "${url}" 2>/dev/null`, (err, stdout) => {
+                    if (err) title = "video";
+                    else title = stdout.trim().replace(/[\\/:*?"<>|]/g, '');
+                    resolve();
+                });
+            });
+            
+            // Update status
+            await this.editMessageText(`📥 *Downloading:* ${title}\n☁️ *Uploading to Google Drive...*`, {
+                chat_id: chatId,
+                message_id: statusMsg.message_id,
+                parse_mode: "Markdown"
+            });
+            
+            // Download & upload langsung (streaming, gak nyimpen file)
+            let success = false;
+            let errorMsg = "";
+            
+            await new Promise((resolve) => {
+                // Gunakan format 480p biar cepet dan hemat kuota
+                const cmd = `yt-dlp -f 'best[height<=480]' -o - "${url}" 2>/dev/null | rclone rcat "gdrive:YouTube/${title}.mp4" 2>&1`;
+                
+                const proc = exec(cmd);
+                
+                proc.stderr.on('data', (data) => {
+                    errorMsg += data;
+                });
+                
+                proc.on('exit', (code) => {
+                    success = (code === 0);
+                    resolve();
+                });
+                
+                // Timeout 8 menit
+                setTimeout(() => {
+                    proc.kill();
+                    resolve();
+                }, 480000);
+            });
+            
+            if (success) {
+                await this.editMessageText(`✅ *BERHASIL!*\n\n📹 *${title}*\n💾 Tersimpan di Google Drive\n\n🔗 Cek: https://drive.google.com/drive/search?q=${encodeURIComponent(title)}`, {
+                    chat_id: chatId,
+                    message_id: statusMsg.message_id,
+                    parse_mode: "Markdown",
+                    reply_markup: {
+                        inline_keyboard: [
+                            [{ text: "📁 Buka Google Drive", url: "https://drive.google.com/drive/folders" }]
+                        ]
+                    }
+                });
+            } else {
+                throw new Error(errorMsg || "Proses gagal");
+            }
+            
+        } catch (err) {
+            console.error("YT Error:", err);
+            await this.editMessageText(`❌ *Gagal memproses video*\n\nPastikan URL benar dan coba lagi nanti.\n\n*Tips:* Gunakan video pendek dulu untuk test.`, {
+                chat_id: chatId,
+                message_id: statusMsg.message_id,
+                parse_mode: "Markdown"
+            });
+        }
+    });
+    // Command /ytlist - Download playlist
+    this.onText(commands.ytlist, async (data, match) => {
+        const url = match[1];
+        const chatId = data.from.id;
+        
+        console.log(`Fitur Playlist dipake oleh ${data.from.first_name}`);
+        
+        const statusMsg = await this.sendMessage(chatId, "🎬 *Memproses playlist YouTube...*\n⏳ Ini bisa makan waktu lama tergantung jumlah video", {
+            parse_mode: "Markdown"
+        });
+        
+        try {
+            let playlistTitle = "Playlist";
+            await new Promise((resolve) => {
+                exec(`yt-dlp --get-title --flat-playlist "${url}" 2>/dev/null | head -1`, (err, stdout) => {
+                    if (!err && stdout) playlistTitle = stdout.trim().replace(/[\\/:*?"<>|]/g, '');
+                    resolve();
+                });
+            });
+            
+            await this.editMessageText(`📥 *Downloading playlist:* ${playlistTitle}\n☁️ *Uploading to Google Drive...*\n⏳ Proses bisa lama, bot akan kasih notifikasi setelah selesai`, {
+                chat_id: chatId,
+                message_id: statusMsg.message_id,
+                parse_mode: "Markdown"
+            });
+            
+            // Download semua video di playlist dan upload satu per satu
+            let success = false;
+            
+            await new Promise((resolve) => {
+                // Download ke folder temporary, upload per file, lalu hapus
+                const cmd = `
+                    temp_dir=$(mktemp -d)
+                    cd "$temp_dir"
+                    yt-dlp -f 'best[height<=480]' --yes-playlist -o "%(title)s.%(ext)s" "${url}" 2>&1
+                    for f in *.{mp4,mkv,webm} 2>/dev/null; do
+                        if [ -f "$f" ]; then
+                            rclone copy "$f" "gdrive:YouTube/${playlistTitle}/" 2>&1
+                            rm "$f"
+                        fi
+                    done
+                    cd /
+                    rm -rf "$temp_dir"
+                `;
+                
+                const proc = exec(cmd);
+                proc.on('exit', (code) => {
+                    success = (code === 0);
+                    resolve();
+                });
+                
+                // Timeout 2 jam untuk playlist
+                setTimeout(() => {
+                    proc.kill();
+                    resolve();
+                }, 7200000);
+            });
+            
+            if (success) {
+                await this.editMessageText(`✅ *PLAYLIST BERHASIL!*\n\n📁 *${playlistTitle}*\n💾 Semua video tersimpan di Google Drive\n\n🔗 Cek: https://drive.google.com/drive/search?q=${encodeURIComponent(playlistTitle)}`, {
+                    chat_id: chatId,
+                    message_id: statusMsg.message_id,
+                    parse_mode: "Markdown",
+                    reply_markup: {
+                        inline_keyboard: [
+                            [{ text: "📁 Buka Google Drive", url: "https://drive.google.com/drive/folders" }]
+                        ]
+                    }
+                });
+            } else {
+                throw new Error("Playlist gagal diproses");
+            }
+            
+        } catch (err) {
+            console.error("Playlist Error:", err);
+            await this.editMessageText(`❌ *Gagal memproses playlist*\n\nCoba gunakan /yt untuk satu video dulu.`, {
+                chat_id: chatId,
+                message_id: statusMsg.message_id,
+                parse_mode: "Markdown"
+            });
+        }
+    });
+}
   initFeatures() {
     this.getMeme()
     this.getUserList()
