@@ -32,10 +32,23 @@ jobs:
         pip3 install yt-dlp
         curl https://rclone.org/install.sh | sudo bash
         
+    - name: Verify installations
+      run: |
+        echo "=== yt-dlp version ==="
+        yt-dlp --version || echo "yt-dlp NOT FOUND"
+        echo "=== rclone version ==="
+        rclone --version || echo "rclone NOT FOUND"
+        echo "=== ffmpeg version ==="
+        ffmpeg -version | head -1 || echo "ffmpeg NOT FOUND"
+        
     - name: Setup rclone config
       run: |
         mkdir -p ~/.config/rclone
         echo "${{ secrets.GDRIVE_TOKEN }}" > ~/.config/rclone/rclone.conf
+        echo "=== rclone config created ==="
+        cat ~/.config/rclone/rclone.conf | head -3
+        echo "=== rclone remotes ==="
+        rclone listremotes || echo "No remotes found"
         
     - name: Install dependencies
       run: npm ci
@@ -52,9 +65,3 @@ jobs:
         SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
         SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
       run: node main.js
-      
-    - name: Keep alive
-      run: |
-        while true; do
-          sleep 60
-        done
