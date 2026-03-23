@@ -803,107 +803,80 @@ ${game.description}
         
         console.log(`Fitur YouTube dipake oleh ${data.from.first_name}`);
         
-        const statusMsg = await this.sendMessage(chatId, "🎬 <b>Memproses video YouTube HD 720p...</b>\n⏳ Mohon tunggu 2-5 menit", {
+        const statusMsg = await this.sendMessage(chatId, "🎬 <b>Memproses video...</b>\n⏳ Mohon tunggu", {
             parse_mode: "HTML"
         });
         
         try {
-            // ===== CEK INSTALLASI =====
-            let ytDlpCheck = "", rcloneCheck = "";
-            
-            await new Promise((resolve) => {
-                exec("which yt-dlp", (err, stdout) => {
-                    ytDlpCheck = stdout.trim();
-                    resolve();
-                });
-            });
-            
-            await new Promise((resolve) => {
-                exec("which rclone", (err, stdout) => {
-                    rcloneCheck = stdout.trim();
-                    resolve();
-                });
-            });
-            
-            console.log(`yt-dlp path: ${ytDlpCheck || "NOT FOUND"}`);
-            console.log(`rclone path: ${rcloneCheck || "NOT FOUND"}`);
-            
-            if (!ytDlpCheck || !rcloneCheck) {
-                throw new Error(`Missing tools: yt-dlp=${!!ytDlpCheck}, rclone=${!!rcloneCheck}`);
-            }
-            
             // ===== AMBIL JUDUL =====
-            let title = "";
+            let title = `video_${Date.now()}`;
             await new Promise((resolve) => {
-                exec(`yt-dlp --user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" --get-title "${url}" 2>/dev/null`, (err, stdout) => {
+                exec(`yt-dlp --get-title "${url}" 2>/dev/null`, (err, stdout) => {
                     if (!err && stdout) {
                         title = stdout.trim().split('\n').pop().replace(/[\\/:*?"<>|]/g, '');
-                    } else {
-                        title = `video_${Date.now()}`;
                     }
                     console.log(`Video title: ${title}`);
                     resolve();
                 });
             });
             
-            await this.editMessageText(`📥 <b>Downloading HD 720p:</b> ${title}\n☁️ <b>Uploading to Google Drive...</b>`, {
+            await this.editMessageText(`📥 <b>Downloading:</b> ${title}\n☁️ <b>Uploading to Google Drive...</b>`, {
                 chat_id: chatId,
                 message_id: statusMsg.message_id,
                 parse_mode: "HTML"
             });
             
-            // ===== DOWNLOAD & UPLOAD =====
-            let stderrLog = "";
+            // ===== DOWNLOAD & UPLOAD dengan format sederhana =====
             let success = false;
             
             await new Promise((resolve) => {
-                const cmd = `yt-dlp --user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" -f 'best[height<=720]' -o - "${url}" 2>/dev/null | rclone rcat "YtDbot:YouTube/${title}.mp4" 2>&1 || yt-dlp --user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" -f 'best[height<=480]' -o - "${url}" 2>/dev/null | rclone rcat "YtDbot:YouTube/${title}.mp4" 2>&1`;
+                // Pake format 480p aja dulu biar stabil
+                const cmd = `yt-dlp -f 'best[height<=480]' --no-check-certificates --prefer-free-formats -o - "${url}" 2>/dev/null | rclone rcat "YtDbot:YouTube/${title}.mp4" 2>&1`;
                 
-                console.log(`Executing download with user-agent...`);
+                console.log(`Executing: yt-dlp -f best[height<=480]...`);
                 
                 const proc = exec(cmd);
                 
+                let errorOutput = "";
                 proc.stderr.on('data', (data) => {
-                    stderrLog += data;
+                    errorOutput += data;
                     console.log(`stderr: ${data.substring(0, 200)}`);
                 });
                 
                 proc.on('exit', (code) => {
                     success = (code === 0);
                     console.log(`Exit code: ${code}`);
+                    if (!success) console.log(`Error: ${errorOutput}`);
                     resolve();
                 });
                 
                 setTimeout(() => {
                     proc.kill();
                     resolve();
-                }, 360000);
+                }, 300000);
             });
             
             if (success) {
-                await this.editMessageText(`✅ <b>BERHASIL!</b>\n\n📹 <b>${title}</b>\n💾 Tersimpan di Google Drive`, {
+                await this.editMessageText(`✅ <b>BERHASIL!</b>\n\n📹 ${title}\n💾 Tersimpan di Google Drive`, {
                     chat_id: chatId,
                     message_id: statusMsg.message_id,
                     parse_mode: "HTML"
                 });
             } else {
-                await this.editMessageText(`❌ <b>Gagal memproses video</b>\n\nCoba lagi nanti.`, {
+                await this.editMessageText(`❌ <b>Gagal memproses video</b>\n\nCoba /yt480 untuk kualitas lebih rendah.`, {
                     chat_id: chatId,
                     message_id: statusMsg.message_id,
                     parse_mode: "HTML"
                 });
-                throw new Error(stderrLog || "Proses gagal");
             }
             
         } catch (err) {
             console.error("YT Error:", err);
-            if (err.message !== "Proses gagal") {
-                await this.editMessageText(`❌ <b>Error:</b> ${err.message.substring(0, 200)}`, {
-                    chat_id: chatId,
-                    message_id: statusMsg.message_id,
-                    parse_mode: "HTML"
-                });
-            }
+            await this.editMessageText(`❌ <b>Error:</b> ${err.message.substring(0, 200)}`, {
+                chat_id: chatId,
+                message_id: statusMsg.message_id,
+                parse_mode: "HTML"
+            });
         }
     });
 }

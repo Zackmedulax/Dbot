@@ -31,8 +31,6 @@ jobs:
         sudo apt-get install -y python3-pip ffmpeg
         pip3 install --upgrade yt-dlp
         curl https://rclone.org/install.sh | sudo bash
-        # Install browser cookie (opsional)
-        pip3 install browser-cookie3
         
     - name: Verify installations
       run: |
@@ -43,19 +41,24 @@ jobs:
         echo "=== ffmpeg version ==="
         ffmpeg -version | head -1 || echo "ffmpeg NOT FOUND"
         
+    - name: Test yt-dlp connection
+      run: |
+        echo "=== Testing yt-dlp get-title ==="
+        yt-dlp --get-title "https://youtu.be/dQw4w9WgXcQ" || echo "Get title failed"
+        echo "=== Testing yt-dlp download (small) ==="
+        yt-dlp -f 'best[height<=480]' -o - "https://youtu.be/dQw4w9WgXcQ" | wc -c || echo "Download failed"
+        
     - name: Setup rclone config
       run: |
         mkdir -p ~/.config/rclone
         echo "${{ secrets.RCLONE_CONFIG }}" > ~/.config/rclone/rclone.conf
         echo "=== rclone config created ==="
-        cat ~/.config/rclone/rclone.conf | head -5
-        echo "=== rclone remotes ==="
         rclone listremotes || echo "No remotes found"
         
     - name: Test rclone connection
       run: |
-        echo "=== Testing rclone connection to Google Drive ==="
-        rclone ls YtDbot: --max-depth 1 2>&1 | head -20 || echo "Connection failed!"
+        echo "=== Testing rclone connection ==="
+        rclone ls YtDbot: --max-depth 1 2>&1 | head -10 || echo "Connection failed!"
         
     - name: Install dependencies
       run: npm ci
