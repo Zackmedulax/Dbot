@@ -44,18 +44,16 @@ jobs:
     - name: Setup rclone config
       run: |
         mkdir -p ~/.config/rclone
-        echo "${{ secrets.GDRIVE_TOKEN }}" > ~/.config/rclone/rclone.conf
+        echo "${{ secrets.RCLONE_CONFIG }}" > ~/.config/rclone/rclone.conf
         echo "=== rclone config created ==="
-        cat ~/.config/rclone/rclone.conf | head -3
+        cat ~/.config/rclone/rclone.conf | head -5
         echo "=== rclone remotes ==="
         rclone listremotes || echo "No remotes found"
         
     - name: Test rclone connection
       run: |
         echo "=== Testing rclone connection to Google Drive ==="
-        rclone ls gdrive: --max-depth 1 2>&1 || echo "Connection failed!"
-        echo "=== Creating test folder ==="
-        rclone mkdir gdrive:TestYT2Drive 2>&1 || echo "Folder exists or error"
+        rclone ls YtDbot: --max-depth 1 2>&1 | head -20 || echo "Connection failed!"
         
     - name: Install dependencies
       run: npm ci
@@ -66,7 +64,6 @@ jobs:
         echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .env
         echo "SUPABASE_SERVICE_KEY=${{ secrets.SUPABASE_KEY }}" >> .env
     
-        
     - name: Run bot
       env:
         BOT_TOKEN: ${{ secrets.BOT_TOKEN }}

@@ -794,6 +794,121 @@ ${game.description}
       }
     });
   }
+  getYoutube() {
+    const { exec } = require('child_process');
+    
+    this.onText(commands.yt, async (data, match) => {
+        const url = match[1];
+        const chatId = data.from.id;
+        
+        console.log(`Fitur YouTube dipake oleh ${data.from.first_name}`);
+        
+        const statusMsg = await this.sendMessage(chatId, "🎬 *Memproses video YouTube HD 720p...*\n⏳ Mohon tunggu 2-5 menit", {
+            parse_mode: "Markdown"
+        });
+        
+        try {
+            // ===== CEK INSTALLASI =====
+            let ytDlpCheck = "", rcloneCheck = "";
+            
+            await new Promise((resolve) => {
+                exec("which yt-dlp", (err, stdout) => {
+                    ytDlpCheck = stdout.trim();
+                    resolve();
+                });
+            });
+            
+            await new Promise((resolve) => {
+                exec("which rclone", (err, stdout) => {
+                    rcloneCheck = stdout.trim();
+                    resolve();
+                });
+            });
+            
+            console.log(`yt-dlp path: ${ytDlpCheck || "NOT FOUND"}`);
+            console.log(`rclone path: ${rcloneCheck || "NOT FOUND"}`);
+            
+            if (!ytDlpCheck || !rcloneCheck) {
+                throw new Error(`Missing tools: yt-dlp=${!!ytDlpCheck}, rclone=${!!rcloneCheck}`);
+            }
+            
+            // ===== AMBIL JUDUL (FIX) =====
+            let title = "";
+            await new Promise((resolve) => {
+                exec(`yt-dlp --get-title "${url}" 2>/dev/null`, (err, stdout) => {
+                    if (!err && stdout) {
+                        const lines = stdout.trim().split('\n');
+                        title = lines[lines.length - 1].replace(/[\\/:*?"<>|]/g, '');
+                    } else {
+                        title = "video";
+                    }
+                    console.log(`Video title: ${title}`);
+                    resolve();
+                });
+            });
+            
+            await this.editMessageText(`📥 *Downloading HD 720p:* ${title}\n☁️ *Uploading to Google Drive...*`, {
+                chat_id: chatId,
+                message_id: statusMsg.message_id,
+                parse_mode: "Markdown"
+            });
+            
+            // ===== DOWNLOAD & UPLOAD (720p) =====
+            let stderrLog = "";
+            let success = false;
+            
+            await new Promise((resolve) => {
+                // GANTI 480 JADI 720
+                const cmd = `yt-dlp -f 'best[height<=720]' -o - "${url}" 2>/dev/null | rclone rcat "YtDbot:YouTube/${title}.mp4" 2>&1`;
+                
+                console.log(`Executing: yt-dlp -f 'best[height<=720]' -o - "${url}" | rclone rcat...`);
+                
+                const proc = exec(cmd);
+                
+                proc.stderr.on('data', (data) => {
+                    stderrLog += data;
+                    console.log(`stderr: ${data.substring(0, 200)}`);
+                });
+                
+                proc.on('exit', (code) => {
+                    success = (code === 0);
+                    console.log(`Exit code: ${code}`);
+                    resolve();
+                });
+                
+                setTimeout(() => {
+                    proc.kill();
+                    resolve();
+                }, 300000);
+            });
+            
+            if (success) {
+                await this.editMessageText(`✅ *BERHASIL!*\n\n📹 *${title}*\n🎬 *Kualitas: HD 720p*\n💾 Tersimpan di Google Drive`, {
+                    chat_id: chatId,
+                    message_id: statusMsg.message_id,
+                    parse_mode: "Markdown"
+                });
+            } else {
+                await this.editMessageText(`❌ *Gagal memproses video HD 720p*\n\nCoba /yt480 untuk kualitas lebih rendah.`, {
+                    chat_id: chatId,
+                    message_id: statusMsg.message_id,
+                    parse_mode: "Markdown"
+                });
+                throw new Error(stderrLog || "Proses gagal");
+            }
+            
+        } catch (err) {
+            console.error("YT Error:", err);
+            if (err.message !== "Proses gagal") {
+                await this.editMessageText(`❌ *Error:* ${err.message.substring(0, 200)}`, {
+                    chat_id: chatId,
+                    message_id: statusMsg.message_id,
+                    parse_mode: "Markdown"
+                });
+            }
+        }
+    });
+}
   // Uji coba API
   getIp() {
     this.onText(commands.ip, async (msg, data) => {
@@ -878,140 +993,6 @@ Silakan klik tombol di bawah untuk melihat detail koneksi kamu:
       }
     })
   }
-  getYoutube() {
-    const { exec } = require('child_process');
-    
-    this.onText(commands.yt, async (data, match) => {
-        const url = match[1];
-        const chatId = data.from.id;
-        
-        console.log(`Fitur YouTube dipake oleh ${data.from.first_name}`);
-        
-        const statusMsg = await this.sendMessage(chatId, "🎬 *Memproses video YouTube...*\n⏳ Mohon tunggu sebentar", {
-            parse_mode: "Markdown"
-        });
-        
-        try {
-            // ===== CEK INSTALLASI =====
-            let ytDlpCheck = "";
-            let rcloneCheck = "";
-            
-            await new Promise((resolve) => {
-                exec("which yt-dlp", (err, stdout) => {
-                    ytDlpCheck = stdout.trim();
-                    resolve();
-                });
-            });
-            
-            await new Promise((resolve) => {
-                exec("which rclone", (err, stdout) => {
-                    rcloneCheck = stdout.trim();
-                    resolve();
-                });
-            });
-            
-            console.log(`yt-dlp path: ${ytDlpCheck || "NOT FOUND"}`);
-            console.log(`rclone path: ${rcloneCheck || "NOT FOUND"}`);
-            
-            if (!ytDlpCheck || !rcloneCheck) {
-                throw new Error(`Missing tools: yt-dlp=${!!ytDlpCheck}, rclone=${!!rcloneCheck}`);
-            }
-            
-            // ===== CEK RCLONE CONFIG =====
-            await new Promise((resolve) => {
-                exec("rclone listremotes", (err, stdout) => {
-                    console.log(`Rclone remotes: ${stdout || "NONE"}`);
-                    resolve();
-                });
-            });
-            
-            // ===== AMBIL JUDUL =====
-            let title = "";
-            await new Promise((resolve) => {
-                exec(`yt-dlp --get-title "${url}" 2>&1`, (err, stdout, stderr) => {
-                    if (err) {
-                        console.log(`yt-dlp get-title stderr: ${stderr}`);
-                        title = "video";
-                    } else {
-                        title = stdout.trim().replace(/[\\/:*?"<>|]/g, '');
-                    }
-                    console.log(`Video title: ${title}`);
-                    resolve();
-                });
-            });
-            
-            await this.editMessageText(`📥 *Downloading:* ${title}\n☁️ *Uploading to Google Drive...*`, {
-                chat_id: chatId,
-                message_id: statusMsg.message_id,
-                parse_mode: "Markdown"
-            });
-            
-            // ===== DOWNLOAD & UPLOAD =====
-            let stdoutLog = "";
-            let stderrLog = "";
-            let success = false;
-            
-            await new Promise((resolve) => {
-                // Coba format yang lebih simpel dulu
-                const cmd = `yt-dlp -f 'best[height<=480]' -o - "${url}" 2>&1 | head -c 100M | rclone rcat "gdrive:YouTube/${title}.mp4" 2>&1`;
-                
-                console.log(`Executing: ${cmd.substring(0, 200)}...`);
-                
-                const proc = exec(cmd);
-                
-                proc.stdout.on('data', (data) => {
-                    stdoutLog += data;
-                    console.log(`stdout: ${data.substring(0, 100)}`);
-                });
-                
-                proc.stderr.on('data', (data) => {
-                    stderrLog += data;
-                    console.log(`stderr: ${data.substring(0, 200)}`);
-                });
-                
-                proc.on('exit', (code) => {
-                    success = (code === 0);
-                    console.log(`Exit code: ${code}`);
-                    console.log(`Full stderr: ${stderrLog}`);
-                    resolve();
-                });
-                
-                setTimeout(() => {
-                    proc.kill();
-                    resolve();
-                }, 300000);
-            });
-            
-            if (success) {
-                await this.editMessageText(`✅ *BERHASIL!*\n\n📹 *${title}*\n💾 Tersimpan di Google Drive`, {
-                    chat_id: chatId,
-                    message_id: statusMsg.message_id,
-                    parse_mode: "Markdown"
-                });
-            } else {
-                // Kirim error detail ke user
-                const errorMsg = stderrLog.substring(0, 300);
-                await this.editMessageText(`❌ *Gagal memproses video*\n\n\`\`\`\n${errorMsg || "Unknown error"}\n\`\`\`\n\nCoba video lain atau format yang lebih kecil.`, {
-                    chat_id: chatId,
-                    message_id: statusMsg.message_id,
-                    parse_mode: "Markdown"
-                });
-                throw new Error(stderrLog || "Proses gagal");
-            }
-            
-        } catch (err) {
-            console.error("YT Error:", err);
-            // Jangan override pesan error yang sudah dikirim
-            if (err.message !== "Proses gagal") {
-                await this.editMessageText(`❌ *Error:* ${err.message.substring(0, 200)}`, {
-                    chat_id: chatId,
-                    message_id: statusMsg.message_id,
-                    parse_mode: "Markdown"
-                });
-            }
-        }
-    });
-}
   initFeatures() {
     this.getMeme()
     this.getUserList()
