@@ -803,7 +803,7 @@ ${game.description}
         
         console.log(`Fitur YouTube dipake oleh ${data.from.first_name}`);
         
-        const statusMsg = await this.sendMessage(chatId, "🎬 *Memproses video YouTube HD 720p...*\n⏳ Mohon tunggu 2-5 menit", {
+        const statusMsg = await this.sendMessage(chatId, "🎬 *Memproses video YouTube...*\n⏳ Mohon tunggu 2-5 menit", {
             parse_mode: "Markdown"
         });
         
@@ -837,8 +837,7 @@ ${game.description}
             await new Promise((resolve) => {
                 exec(`yt-dlp --get-title "${url}" 2>/dev/null`, (err, stdout) => {
                     if (!err && stdout) {
-                        const lines = stdout.trim().split('\n');
-                        title = lines[lines.length - 1].replace(/[\\/:*?"<>|]/g, '');
+                        title = stdout.trim().split('\n').pop().replace(/[\\/:*?"<>|]/g, '');
                     } else {
                         title = "video";
                     }
@@ -847,21 +846,21 @@ ${game.description}
                 });
             });
             
-            await this.editMessageText(`📥 *Downloading HD 720p:* ${title}\n☁️ *Uploading to Google Drive...*`, {
+            await this.editMessageText(`📥 *Downloading:* ${title}\n☁️ *Uploading to Google Drive...*`, {
                 chat_id: chatId,
                 message_id: statusMsg.message_id,
                 parse_mode: "Markdown"
             });
             
-            // ===== DOWNLOAD & UPLOAD (720p) =====
+            // ===== DOWNLOAD & UPLOAD dengan fallback =====
             let stderrLog = "";
             let success = false;
             
             await new Promise((resolve) => {
-                // GANTI 480 JADI 720
-                const cmd = `yt-dlp -f 'best[height<=720]' -o - "${url}" 2>/dev/null | rclone rcat "YtDbot:YouTube/${title}.mp4" 2>&1`;
+                // Coba 720p dulu, kalau gagal fallback ke 480p
+                const cmd = `yt-dlp -f 'best[height<=720]' -o - "${url}" 2>/dev/null | rclone rcat "YtDbot:YouTube/${title}.mp4" 2>&1 || yt-dlp -f 'best[height<=480]' -o - "${url}" 2>/dev/null | rclone rcat "YtDbot:YouTube/${title}.mp4" 2>&1`;
                 
-                console.log(`Executing: yt-dlp -f 'best[height<=720]' -o - "${url}" | rclone rcat...`);
+                console.log(`Executing: yt-dlp -f 'best[height<=720]'... fallback to 480p if fails`);
                 
                 const proc = exec(cmd);
                 
@@ -883,13 +882,13 @@ ${game.description}
             });
             
             if (success) {
-                await this.editMessageText(`✅ *BERHASIL!*\n\n📹 *${title}*\n🎬 *Kualitas: HD 720p*\n💾 Tersimpan di Google Drive`, {
+                await this.editMessageText(`✅ *BERHASIL!*\n\n📹 *${title}*\n💾 Tersimpan di Google Drive`, {
                     chat_id: chatId,
                     message_id: statusMsg.message_id,
                     parse_mode: "Markdown"
                 });
             } else {
-                await this.editMessageText(`❌ *Gagal memproses video HD 720p*\n\nCoba /yt480 untuk kualitas lebih rendah.`, {
+                await this.editMessageText(`❌ *Gagal memproses video*\n\nError: ${stderrLog.substring(0, 150)}`, {
                     chat_id: chatId,
                     message_id: statusMsg.message_id,
                     parse_mode: "Markdown"
@@ -909,6 +908,7 @@ ${game.description}
         }
     });
 }
+  
   // Uji coba API
   getIp() {
     this.onText(commands.ip, async (msg, data) => {
