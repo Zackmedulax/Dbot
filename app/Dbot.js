@@ -829,17 +829,18 @@ ${game.description}
             console.log(`rclone path: ${rcloneCheck || "NOT FOUND"}`);
             
             if (!ytDlpCheck || !rcloneCheck) {
-                throw new Error(`Missing tools: yt-dlp=${!!ytDlpCheck}, rclone=${!!rcloneCheck}`);
+                throw new Error(`Missing tools`);
             }
             
-            // ===== AMBIL JUDUL (FIX) =====
+            // ===== AMBIL JUDUL dengan user-agent =====
             let title = "";
             await new Promise((resolve) => {
-                exec(`yt-dlp --get-title "${url}" 2>/dev/null`, (err, stdout) => {
+                const cmd = `yt-dlp --user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" --get-title "${url}" 2>/dev/null`;
+                exec(cmd, (err, stdout) => {
                     if (!err && stdout) {
                         title = stdout.trim().split('\n').pop().replace(/[\\/:*?"<>|]/g, '');
                     } else {
-                        title = "video";
+                        title = `video_${Date.now()}`;
                     }
                     console.log(`Video title: ${title}`);
                     resolve();
@@ -852,15 +853,15 @@ ${game.description}
                 parse_mode: "Markdown"
             });
             
-            // ===== DOWNLOAD & UPLOAD dengan fallback =====
+            // ===== DOWNLOAD & UPLOAD dengan user-agent =====
             let stderrLog = "";
             let success = false;
             
             await new Promise((resolve) => {
-                // Coba 720p dulu, kalau gagal fallback ke 480p
-                const cmd = `yt-dlp -f 'best[height<=720]' -o - "${url}" 2>/dev/null | rclone rcat "YtDbot:YouTube/${title}.mp4" 2>&1 || yt-dlp -f 'best[height<=480]' -o - "${url}" 2>/dev/null | rclone rcat "YtDbot:YouTube/${title}.mp4" 2>&1`;
+                // Pake user-agent biar gak diblokir
+                const cmd = `yt-dlp --user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" -f 'best[height<=720]' -o - "${url}" 2>/dev/null | rclone rcat "YtDbot:YouTube/${title}.mp4" 2>&1 || yt-dlp --user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" -f 'best[height<=480]' -o - "${url}" 2>/dev/null | rclone rcat "YtDbot:YouTube/${title}.mp4" 2>&1`;
                 
-                console.log(`Executing: yt-dlp -f 'best[height<=720]'... fallback to 480p if fails`);
+                console.log(`Executing download with user-agent...`);
                 
                 const proc = exec(cmd);
                 
@@ -878,7 +879,7 @@ ${game.description}
                 setTimeout(() => {
                     proc.kill();
                     resolve();
-                }, 300000);
+                }, 360000); // 6 menit
             });
             
             if (success) {
@@ -888,7 +889,7 @@ ${game.description}
                     parse_mode: "Markdown"
                 });
             } else {
-                await this.editMessageText(`❌ *Gagal memproses video*\n\nError: ${stderrLog.substring(0, 150)}`, {
+                await this.editMessageText(`❌ *Gagal memproses video*\n\nCoba lagi nanti atau gunakan video lain.`, {
                     chat_id: chatId,
                     message_id: statusMsg.message_id,
                     parse_mode: "Markdown"
@@ -908,7 +909,6 @@ ${game.description}
         }
     });
 }
-  
   // Uji coba API
   getIp() {
     this.onText(commands.ip, async (msg, data) => {
