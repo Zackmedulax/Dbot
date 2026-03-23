@@ -728,7 +728,7 @@ ${game.description}
     })
   }
   getDownload() {
-    this.onText(commands.download, async (data, match, after) => {
+    this.onText(commands.download, async (data, match) => {
       const url = match[1].trim();
       const chatId = data.from.id;
 
