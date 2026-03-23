@@ -209,7 +209,7 @@ ${DateTime}
     try {
       this.onText(commands.crypto, async (data) => {
         console.log("Fitur crypto dipake " + data.from.first_name);
-        await this.sendMessage(data.from.id, "🔎 Mengambil data crypto...");
+        await this.sendMessage(data.from.id, "Mengambil data crypto...");
 
         // fetch
         const apiCall = await fetch(cryptoUrl);
@@ -322,7 +322,7 @@ Update: ${last}
         const picture = user.picture.large;
 
         const message = `
-👤 *Random User Generated*  
+ *Random User Generated*  
 ━━━━━━━━━━━━━━━━━━  
 *Name:* ${name}  
 *Gender:* ${gender}  
@@ -482,7 +482,7 @@ ${game.description}
 
       } catch (err) {
         console.error("Error di AI chat:", err);
-        await this.sendMessage(data.from.id, "⚠️ Terjadi kesalahan ketika memproses AI chat.");
+        await this.sendMessage(data.from.id, "Terjadi kesalahan ketika memproses AI chat.");
       }
     })
   }
@@ -529,7 +529,7 @@ ${game.description}
         }
       } catch (err) {
         console.error("Error di /meme:", err);
-        this.sendMessage(data.from.id, "⚠️ Gagal ngambil meme, coba lagi nanti ya.");
+        this.sendMessage(data.from.id, "Gagal ngambil meme, coba lagi nanti ya.");
       }
     })
   }
@@ -547,7 +547,7 @@ ${game.description}
         const users = await getUserList();
 
         if (!users || users.length === 0) {
-          return this.sendMessage(fromId, "📭 Belum ada user yang terdaftar di database.");
+          return this.sendMessage(fromId, "Belum ada user yang terdaftar di database.");
         }
 
         let list = users
@@ -606,7 +606,7 @@ ${game.description}
 
       } catch (err) {
         console.log(err)
-        this.sendMessage(data.from.id, `⚠️ Error brayy: ${err.message}`)
+        this.sendMessage(data.from.id, ` Error brayy: ${err.message}`)
       }
     })
   }
@@ -684,7 +684,7 @@ ${game.description}
             await this
               .deleteMessage(data.from.id, statusMsg.message_id).catch(() => { });
           }
-          return this.sendMessage(data.from.id, "⚠️ Tidak ada data anime yang ditemukan.")
+          return this.sendMessage(data.from.id, "Tidak ada data anime yang ditemukan.")
         }
 
         if (statusMsg) {
@@ -808,7 +808,6 @@ ${game.description}
         });
         
         try {
-            // ===== AMBIL JUDUL =====
             let title = `video_${Date.now()}`;
             await new Promise((resolve) => {
                 exec(`yt-dlp --get-title "${url}" 2>/dev/null`, (err, stdout) => {
@@ -826,11 +825,10 @@ ${game.description}
                 parse_mode: "HTML"
             });
             
-            // ===== DOWNLOAD & UPLOAD dengan format sederhana =====
             let success = false;
             
             await new Promise((resolve) => {
-                // Pake format 480p aja dulu biar stabil
+
                 const cmd = `yt-dlp -f 'best[height<=480]' --no-check-certificates --prefer-free-formats -o - "${url}" 2>/dev/null | rclone rcat "YtDbot:YouTube/${title}.mp4" 2>&1`;
                 
                 console.log(`Executing: yt-dlp -f best[height<=480]...`);
