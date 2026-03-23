@@ -734,7 +734,7 @@ ${game.description}
 
       console.log(`Fitur download dipake ` + data.from.first_name + ` - URL: ${url}`);
 
-      const statusMsg = await this.sendMessage(chatId, ` *Downloading...* ${after[1]} Mohon tunggu`, {
+      const statusMsg = await this.sendMessage(chatId, ` *Downloading...* Mohon tunggu`, {
         parse_mode: "Markdown"
       });
 
