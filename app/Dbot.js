@@ -803,8 +803,8 @@ ${game.description}
         
         console.log(`Fitur YouTube dipake oleh ${data.from.first_name}`);
         
-        const statusMsg = await this.sendMessage(chatId, "🎬 *Memproses video YouTube...*\n⏳ Mohon tunggu 2-5 menit", {
-            parse_mode: "Markdown"
+        const statusMsg = await this.sendMessage(chatId, "🎬 <b>Memproses video YouTube HD 720p...</b>\n⏳ Mohon tunggu 2-5 menit", {
+            parse_mode: "HTML"
         });
         
         try {
@@ -829,14 +829,13 @@ ${game.description}
             console.log(`rclone path: ${rcloneCheck || "NOT FOUND"}`);
             
             if (!ytDlpCheck || !rcloneCheck) {
-                throw new Error(`Missing tools`);
+                throw new Error(`Missing tools: yt-dlp=${!!ytDlpCheck}, rclone=${!!rcloneCheck}`);
             }
             
-            // ===== AMBIL JUDUL dengan user-agent =====
+            // ===== AMBIL JUDUL =====
             let title = "";
             await new Promise((resolve) => {
-                const cmd = `yt-dlp --user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" --get-title "${url}" 2>/dev/null`;
-                exec(cmd, (err, stdout) => {
+                exec(`yt-dlp --user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" --get-title "${url}" 2>/dev/null`, (err, stdout) => {
                     if (!err && stdout) {
                         title = stdout.trim().split('\n').pop().replace(/[\\/:*?"<>|]/g, '');
                     } else {
@@ -847,18 +846,17 @@ ${game.description}
                 });
             });
             
-            await this.editMessageText(`📥 *Downloading:* ${title}\n☁️ *Uploading to Google Drive...*`, {
+            await this.editMessageText(`📥 <b>Downloading HD 720p:</b> ${title}\n☁️ <b>Uploading to Google Drive...</b>`, {
                 chat_id: chatId,
                 message_id: statusMsg.message_id,
-                parse_mode: "Markdown"
+                parse_mode: "HTML"
             });
             
-            // ===== DOWNLOAD & UPLOAD dengan user-agent =====
+            // ===== DOWNLOAD & UPLOAD =====
             let stderrLog = "";
             let success = false;
             
             await new Promise((resolve) => {
-                // Pake user-agent biar gak diblokir
                 const cmd = `yt-dlp --user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" -f 'best[height<=720]' -o - "${url}" 2>/dev/null | rclone rcat "YtDbot:YouTube/${title}.mp4" 2>&1 || yt-dlp --user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" -f 'best[height<=480]' -o - "${url}" 2>/dev/null | rclone rcat "YtDbot:YouTube/${title}.mp4" 2>&1`;
                 
                 console.log(`Executing download with user-agent...`);
@@ -879,20 +877,20 @@ ${game.description}
                 setTimeout(() => {
                     proc.kill();
                     resolve();
-                }, 360000); // 6 menit
+                }, 360000);
             });
             
             if (success) {
-                await this.editMessageText(`✅ *BERHASIL!*\n\n📹 *${title}*\n💾 Tersimpan di Google Drive`, {
+                await this.editMessageText(`✅ <b>BERHASIL!</b>\n\n📹 <b>${title}</b>\n💾 Tersimpan di Google Drive`, {
                     chat_id: chatId,
                     message_id: statusMsg.message_id,
-                    parse_mode: "Markdown"
+                    parse_mode: "HTML"
                 });
             } else {
-                await this.editMessageText(`❌ *Gagal memproses video*\n\nCoba lagi nanti atau gunakan video lain.`, {
+                await this.editMessageText(`❌ <b>Gagal memproses video</b>\n\nCoba lagi nanti.`, {
                     chat_id: chatId,
                     message_id: statusMsg.message_id,
-                    parse_mode: "Markdown"
+                    parse_mode: "HTML"
                 });
                 throw new Error(stderrLog || "Proses gagal");
             }
@@ -900,10 +898,10 @@ ${game.description}
         } catch (err) {
             console.error("YT Error:", err);
             if (err.message !== "Proses gagal") {
-                await this.editMessageText(`❌ *Error:* ${err.message.substring(0, 200)}`, {
+                await this.editMessageText(`❌ <b>Error:</b> ${err.message.substring(0, 200)}`, {
                     chat_id: chatId,
                     message_id: statusMsg.message_id,
-                    parse_mode: "Markdown"
+                    parse_mode: "HTML"
                 });
             }
         }
