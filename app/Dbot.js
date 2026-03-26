@@ -955,8 +955,7 @@ Silakan klik tombol di bawah untuk melihat detail koneksi kamu:
       try {
         const apiCall = await fetch(dogsEndpoint)
         const response = await apiCall.json()
-        console.log(response)
-        this.sendMessage(data.from.id, "runn")
+        this.sendMessage(data.from.id, `${response}`)
       } catch(err) {
         this.sendMessage(data.from.id, "Error bray")
       }
