@@ -1,4 +1,8 @@
 const TelegramBot = require("node-telegram-bot-api")
+const axios = require('axios');
+const FormData = require('form-data');
+const fs = require('fs');
+const path = require('path');
 const fetch = require("node-fetch")
 const commands = require('../libs/commands.js')
 const { helpText, invalidCommand, startMessage } = require('../libs/consttand.js')
@@ -964,6 +968,84 @@ Silakan klik tombol di bawah untuk melihat detail koneksi kamu:
       }
     })
   }
+  getHDPhoto() {
+    this.onText(commands.hd, async (data) => {
+        const chatId = data.from.id;
+
+        const replyTo = data.reply_to_message;
+        if (!replyTo || !replyTo.photo) {
+            return this.sendMessage(chatId, "❌ *Cara pakai:* Reply foto dengan perintah `/hd`\n\nContoh: balas foto lalu ketik /hd", {
+                parse_mode: "Markdown"
+            });
+        }
+        
+
+        const photo = replyTo.photo[replyTo.photo.length - 1];
+        const fileId = photo.file_id;
+        
+        const statusMsg = await this.sendMessage(chatId, "🎨 *Memproses foto ke HD...*\n⏳ Mohon tunggu 10-30 detik", {
+            parse_mode: "Markdown"
+        });
+        
+        try {
+            const fileLink = await this.getFileLink(fileId);
+
+            const tempInput = `/tmp/input_${Date.now()}.jpg`;
+            const tempOutput = `/tmp/output_${Date.now()}.png`;
+            
+            const response = await axios({
+                method: 'GET',
+                url: fileLink,
+                responseType: 'stream'
+            });
+            
+            const writer = fs.createWriteStream(tempInput);
+            response.data.pipe(writer);
+            
+            await new Promise((resolve, reject) => {
+                writer.on('finish', resolve);
+                writer.on('error', reject);
+            });
+            
+            await this.editMessageText(`🖼️ *Mengupgrade kualitas gambar...*`, {
+                chat_id: chatId,
+                message_id: statusMsg.message_id,
+                parse_mode: "Markdown"
+            });
+            
+            await new Promise((resolve) => {
+                const { exec } = require('child_process');
+                exec(`ffmpeg -i "${tempInput}" -vf "scale=iw*2:ih*2:flags=lanczos" -quality 95 "${tempOutput}" -y`, (err) => {
+                    resolve();
+                });
+            });
+            
+            await this.sendPhoto(chatId, tempOutput, {
+                caption: `✅ *HD Photo Berhasil!*\n\n📐 Ukuran: ${(fs.statSync(tempOutput).size / 1024 / 1024).toFixed(2)} MB\n🖼️ Kualitas: Enhanced 2x`,
+                parse_mode: "Markdown"
+            });
+            
+            await this.deleteMessage(chatId, statusMsg.message_id);
+            
+            fs.unlinkSync(tempInput);
+            fs.unlinkSync(tempOutput);
+            
+        } catch (err) {
+            console.error("HD Photo Error:", err);
+            await this.editMessageText(`❌ *Gagal memproses foto*\n\nError: ${err.message.substring(0, 150)}`, {
+                chat_id: chatId,
+                message_id: statusMsg.message_id,
+                parse_mode: "Markdown"
+            });
+        }
+    });
+}
+  async getFileLink(fileId) {
+    const url = `https://api.telegram.org/bot${this.token}/getFile?file_id=${fileId}`;
+    const response = await axios.get(url);
+    const filePath = response.data.result.file_path;
+    return `https://api.telegram.org/file/bot${this.token}/${filePath}`;
+}
   initFeatures() {
     this.getMeme()
     this.getUserList()

@@ -36,6 +36,7 @@ const main = () => {
   dbot.getDownload()
   dbot.getDogs()
   dbot.getYoutube()
+  dbot.getHDPhoto()
 }
 
 main()
