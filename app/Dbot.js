@@ -1046,6 +1046,20 @@ Silakan klik tombol di bawah untuk melihat detail koneksi kamu:
     const filePath = response.data.result.file_path;
     return `https://api.telegram.org/file/bot${this.token}/${filePath}`;
 }
+  getMessage() {
+    const api = "api"
+    this.onText(commands.coba, async (data) => {
+      try {
+        const apiCall = await fetch(api)
+        const response = apiCall.json()
+        sendMessage(data.from.id, "fitur runn")
+      }catch(err) { 
+        console.log(err)
+        sendMessage(data.from.id, "err")
+        
+      }
+    })
+  }
   initFeatures() {
     this.getMeme()
     this.getUserList()
