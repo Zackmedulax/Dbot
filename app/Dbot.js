@@ -438,8 +438,9 @@ ${game.description}
         const pesan = `
         Hallo kok ga di pake pake
         `.trim();
-
+        // Pemangilan belum ke supabese
         const { getBroadcast } = require("../libs/db.js");
+        
         const userIds = await getBroadcast();
 
         if (!userIds || userIds.length === 0) {
