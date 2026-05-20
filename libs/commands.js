@@ -20,7 +20,7 @@ const commands = {
   wallet: /^\/wallet\s+(.+)/, 
   anime: /^\/anime$/,
   download: /\/dl (.+)/,
-  qr: /^\/qrcode\s+(.+)$/,
+  qr: /^\/qr\s+(.+)$/,
   // Cobba 
   ip: /^\/ip$/,
   dogs: /^\/dog$/,
