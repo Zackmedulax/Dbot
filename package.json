@@ -1,7 +1,7 @@
 {
   "name": "d-bot",
   "version": "1.0.0",
-  "description": "dins bot learn",
+  "description": "dins bot telegam",
   "main": "main.js",
   "scripts": {
     "start": "nodemon main.js --ignore db.json",

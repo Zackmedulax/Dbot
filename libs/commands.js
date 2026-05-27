@@ -27,6 +27,7 @@ const commands = {
   hd: /^\/hd$/,
   yt: /^\/yt\s+(https?:\/\/(www\.)?(youtube\.com|youtu\.be)\/.*)$/i,
     ytlist: /^\/ytlist\s+(https?:\/\/(www\.)?(youtube\.com)\/playlist\?list=.*)$/i,
+  coba: /^\/coba$/
 }
 
 module.exports = commands

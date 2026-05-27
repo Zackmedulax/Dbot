@@ -883,40 +883,6 @@ ${game.description}
         }
     });
 }
-  // Uji coba API
-  getIp() {
-    this.onText(commands.ip, async (msg, data) => {
-      const chatId = msg.chat.id;
-      console.log("Fitur ip dipake " + data.from.first_name);
-
-      const pesan = `
-*Cek Alamat IP Kamu*
-
-Untuk alasan keamanan, Telegram tidak membagikan alamat IP kamu ke Bot. 
-Silakan klik tombol di bawah untuk melihat detail koneksi kamu:
-    `;
-
-      const options = {
-        parse_mode: 'Markdown',
-        reply_markup: {
-          inline_keyboard: [
-            [
-              {
-                text: "🌐 Cek IP Saya",
-                url: "https://ipapi.co/json/"
-              }
-            ]
-          ]
-        }
-      };
-
-      try {
-        await this.sendMessage(chatId, pesan, options);
-      } catch (e) {
-        console.error("Error mengirim pesan:", e);
-      }
-    });
-  }
   getQc() {
     this.onText(commands.qr, async (data, match) => {
       try {
@@ -952,6 +918,40 @@ Silakan klik tombol di bawah untuk melihat detail koneksi kamu:
         "/qr Hello World\n" +
         "/qr WA:08123456789"
       );
+    });
+  }
+  // Uji coba API
+  getIp() {
+    this.onText(commands.ip, async (msg, data) => {
+      const chatId = msg.chat.id;
+      console.log("Fitur ip dipake " + data.from.first_name);
+
+      const pesan = `
+*Cek Alamat IP Kamu*
+
+Untuk alasan keamanan, Telegram tidak membagikan alamat IP kamu ke Bot. 
+Silakan klik tombol di bawah untuk melihat detail koneksi kamu:
+    `;
+
+      const options = {
+        parse_mode: 'Markdown',
+        reply_markup: {
+          inline_keyboard: [
+            [
+              {
+                text: "🌐 Cek IP Saya",
+                url: "https://ipapi.co/json/"
+              }
+            ]
+          ]
+        }
+      };
+
+      try {
+        await this.sendMessage(chatId, pesan, options);
+      } catch (e) {
+        console.error("Error mengirim pesan:", e);
+      }
     });
   }
   getDogs() {
@@ -1048,16 +1048,21 @@ Silakan klik tombol di bawah untuk melihat detail koneksi kamu:
     return `https://api.telegram.org/file/bot${this.token}/${filePath}`;
 }
   getMessage() {
-    const api = "api"
-    this.onText(commands.coba, async (data) => {
+    this.onText(commands.coba, async(data) => {
+      const api = "https://jsonplaceholder.typicode.com/todos/1"
       try {
-        const apiCall = await fetch(api)
-        const response = apiCall.json()
-        sendMessage(data.from.id, "fitur runn")
-      }catch(err) { 
+        const apiCall = await fetch (api)
+        const response = await apiCall.json()
+        console.log(response)
+        const { userId, id, title } = response
+        this.sendMessage(data.from.id, `
+userId: ${userId}
+Id: ${id}
+title: ${title}
+`)
+      }catch(err) {
         console.log(err)
-        sendMessage(data.from.id, "err")
-        
+        this.sendMessage(data.from.id, `${err}`)
       }
     })
   }
