@@ -1053,7 +1053,6 @@ Silakan klik tombol di bawah untuk melihat detail koneksi kamu:
       try {
         const apiCall = await fetch (api)
         const response = await apiCall.json()
-        console.log(response)
         const { userId, id, title } = response
         this.sendMessage(data.from.id, `
 userId: ${userId}
