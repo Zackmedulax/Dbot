@@ -80,7 +80,6 @@ Tekan help untuk melihat panduan lengkap.
   getFollow() {
     this.onText(commands.follow, (data, after) => {
       console.log("Fitur follow di pake " + data.from.first_name)
-      console.log(data)
       this.sendMessage(data.from.id, `
 Message Id '${data.from.message_id}'
 Dari '${data.from.first_name}'
