@@ -1,3 +1,4 @@
+process.env.NODE_OPTIONS = "--dns-result-order=ipv4first";
 require("dotenv").config()
 const Dbot = require("./app/Dbot.js")
 const TelegramBot = require('node-telegram-bot-api')
@@ -5,8 +6,14 @@ const { addUser, getUserById } = require("./libs/db")
 const token = process.env.TELEGRAM_TOKEN
 const news = process.env.NEWS_TOKEN
 const options = {
-  polling: true
-}
+  polling: true,
+  request: {
+    agentOptions: { family: 4, keepAlive: true },
+    fetchOptions: {
+      timeout: 30000
+    }
+  }
+};
 const dbot = new Dbot(token, options)
 
 const main = () => {
